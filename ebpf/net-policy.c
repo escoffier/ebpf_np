@@ -1,12 +1,31 @@
 #include "vmlinux.h"
 // #include <linux/if_ether.h>
-#include <linux/pkt_cls.h>
+// #include <linux/pkt_cls.h>
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_endian.h>
 
 #define ETH_HLEN	14		/* Total octets in header.	 */
 
 #define ETH_P_IP	0x0800		/* Internet Protocol packet	*/
+
+
+#define TC_ACT_UNSPEC	(-1)
+#define TC_ACT_OK		0
+#define TC_ACT_RECLASSIFY	1
+#define TC_ACT_SHOT		2
+#define TC_ACT_PIPE		3
+#define TC_ACT_STOLEN		4
+#define TC_ACT_QUEUED		5
+#define TC_ACT_REPEAT		6
+#define TC_ACT_REDIRECT		7
+#define TC_ACT_TRAP		8 /* For hw path, this means "trap to cpu"
+				   * and don't further process the frame
+				   * in hardware. For sw path, this is
+				   * equivalent of TC_ACT_STOLEN - drop
+				   * the skb and act like everything
+				   * is alright.
+				   */
+#define TC_ACT_VALUE_MAX	TC_ACT_TRAP
 
 struct netpolicy_rule {
     __u32 address[2];
