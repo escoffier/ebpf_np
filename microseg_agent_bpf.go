@@ -66,7 +66,7 @@ type microseg_agentProgramSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type microseg_agentMapSpecs struct {
-	RuleMap *ebpf.MapSpec `ebpf:"rule_map"`
+	NetpolicyRule *ebpf.MapSpec `ebpf:"netpolicy_rule"`
 }
 
 // microseg_agentObjects contains all objects after they have been loaded into the kernel.
@@ -88,12 +88,12 @@ func (o *microseg_agentObjects) Close() error {
 //
 // It can be passed to loadMicroseg_agentObjects or ebpf.CollectionSpec.LoadAndAssign.
 type microseg_agentMaps struct {
-	RuleMap *ebpf.Map `ebpf:"rule_map"`
+	NetpolicyRule *ebpf.Map `ebpf:"netpolicy_rule"`
 }
 
 func (m *microseg_agentMaps) Close() error {
 	return _Microseg_agentClose(
-		m.RuleMap,
+		m.NetpolicyRule,
 	)
 }
 
