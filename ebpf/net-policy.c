@@ -45,8 +45,8 @@ static __inline struct app_info * get_app_info_from_ipv4(__u32 ipv4)
     return bpf_map_lookup_elem(&rule_map, &ipv4);
 }
 
-SEC("ingress") 
-int tc_ingress(struct __sk_buff *skb) {
+SEC("egress") 
+int tc_egress(struct __sk_buff *skb) {
   void *data = (void *)(long)skb->data;
   void *data_end = (void *)(long)skb->data_end;
 
@@ -65,7 +65,7 @@ int tc_ingress(struct __sk_buff *skb) {
     return TC_ACT_OK;
   }
 
-  bpf_printk("tc ingress protocol:  %d, source ip: %u, dest ip: %d.\n",
+  bpf_printk("tc egress protocol:  %d, source ip: %u, dest ip: %d.\n",
              eth->h_proto, ip->saddr, ip->daddr);
   return TC_ACT_OK;
 }
