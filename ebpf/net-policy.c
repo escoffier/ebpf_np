@@ -52,7 +52,7 @@ struct {
 // }
 
 // ipv4 should be in big endian
-static __inline struct app_info * get_rule_from_ipv4(__u32 ipv4)
+static __inline struct netpolicy_rule * get_rule_from_ipv4(__u32 ipv4)
 {
     return bpf_map_lookup_elem(&netpolicy_rule, &ipv4);
 }
