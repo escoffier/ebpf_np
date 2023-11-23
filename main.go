@@ -112,8 +112,8 @@ func main() {
 		return
 	}
 	_ = &tc.Config{}
-	fd := p.object.microseg_agentPrograms.TcEgress.FD()
-	info, err := p.object.microseg_agentPrograms.TcEgress.Info()
+	fd := p.object.TcEgress.FD()
+	info, err := p.object.TcEgress.Info()
 	if err != nil {
 		fmt.Printf("get ingress %v", err)
 		return

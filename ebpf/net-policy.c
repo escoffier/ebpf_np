@@ -4,6 +4,11 @@
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_endian.h>
 
+#ifndef __inline
+#define __inline                         \
+   inline __attribute__((always_inline))
+#endif
+
 #define ETH_HLEN	14		/* Total octets in header.	 */
 
 #define ETH_P_IP	0x0800		/* Internet Protocol packet	*/
@@ -45,8 +50,8 @@ static __inline struct app_info * get_app_info_from_ipv4(__u32 ipv4)
     return bpf_map_lookup_elem(&rule_map, &ipv4);
 }
 
-SEC("egress") 
-int tc_egress(struct __sk_buff *skb) {
+SEC("tc") 
+int wl_egress(struct __sk_buff *skb) {
   void *data = (void *)(long)skb->data;
   void *data_end = (void *)(long)skb->data_end;
 
