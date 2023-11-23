@@ -78,12 +78,12 @@ int wl_egress(struct __sk_buff *skb) {
     return TC_ACT_OK;
   }
 
-  bpf_printk("tc egress protocol:  %d, source ip: %u, dest ip: %d.\n",
-             eth->h_proto, ip->saddr, ip->daddr);
+  bpf_printk("tc egress protocol:  %d, source ip: %u, dest ip: %u.\n",
+             eth->h_proto, bpf_ntohl(ip->saddr), bpf_ntohl(ip->daddr));
   
   rule = get_rule_from_ipv4(ip->saddr);
   if (rule) {
-    bpf_printk("match rule, drop pkt\n");
+    bpf_printk("match rule, port %u, drop pkt\n", rule->port);
     return TC_ACT_SHOT;
   }
 
