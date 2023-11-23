@@ -27,11 +27,13 @@ type PolicyEnforcer struct {
 }
 
 func (p *PolicyEnforcer) initEbpfObjects() error {
-	err := loadMicroseg_agentObjects(p.object, nil)
+	object := microseg_agentObjects{}
+	err := loadMicroseg_agentObjects(&object, nil)
 	if err != nil {
-		fmt.Printf("load object %v\n", err)
+		fmt.Printf("load object: %v\n", err)
 		return err
 	}
+	p.object = &object
 	return nil
 }
 
@@ -102,11 +104,11 @@ func (p *PolicyEnforcer) updatePolicyRule() {
 
 func main() {
 	p := PolicyEnforcer{
-		object: &microseg_agentObjects{},
+		// object: &microseg_agentObjects{},
 	}
 	err := p.initEbpfObjects()
 	if err != nil {
-		fmt.Printf("init ebpf object %v\n", err)
+		fmt.Printf("init ebpf object: %v\n", err)
 		return
 	}
 	_ = &tc.Config{}
