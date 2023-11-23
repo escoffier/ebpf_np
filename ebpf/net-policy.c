@@ -45,10 +45,10 @@ struct {
         __uint(pinning, LIBBPF_PIN_BY_NAME);
 } rule_map SEC(".maps");
 
-static __inline struct app_info * get_app_info_from_ipv4(__u32 ipv4)
-{
-    return bpf_map_lookup_elem(&rule_map, &ipv4);
-}
+// static __inline struct app_info * get_app_info_from_ipv4(__u32 ipv4)
+// {
+//     return bpf_map_lookup_elem(&rule_map, &ipv4);
+// }
 
 SEC("tc") 
 int wl_egress(struct __sk_buff *skb) {
@@ -74,3 +74,5 @@ int wl_egress(struct __sk_buff *skb) {
              eth->h_proto, ip->saddr, ip->daddr);
   return TC_ACT_OK;
 }
+
+char __license[] SEC("license") = "GPL";
