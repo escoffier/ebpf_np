@@ -83,7 +83,7 @@ int wl_egress(struct __sk_buff *skb) {
   
   rule = get_rule_from_ipv4(ip->saddr);
   if (rule) {
-    bpf_printk("match rule, drop pkt");
+    bpf_printk("match rule, drop pkt\n");
     return TC_ACT_SHOT;
   }
 
