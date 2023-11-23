@@ -133,7 +133,7 @@ func (p *PolicyEnforcer) updatePolicyRule() error {
 	}
 	ip := addr.AsSlice()
 
-	err := p.object.RuleMap.Update(ip, rule, ebpf.UpdateAny)
+	err := p.object.NetpolicyRule.Update(ip, rule, ebpf.UpdateAny)
 	if err != nil {
 		return err
 	}
