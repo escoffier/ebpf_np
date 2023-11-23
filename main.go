@@ -20,7 +20,7 @@ const (
 
 var isBigEndian = native.IsBigEndian
 
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -cc clang -target bpf -cflags "-D__TARGET_ARCH_x86" microseg_agent ./ebpf/net-policy.c
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target bpf -cflags "-D__TARGET_ARCH_x86" microseg_agent ./ebpf/net-policy.c
 
 type PolicyEnforcer struct {
 	object *microseg_agentObjects
@@ -119,7 +119,7 @@ func main() {
 		return
 	}
 	name := info.Name
-	var ifindex uint32 = 4139
+	var ifindex uint32 = 12 
 
 	err = p.attachTC(ifindex, "egress", uint32(fd), name)
 	if err != nil {
