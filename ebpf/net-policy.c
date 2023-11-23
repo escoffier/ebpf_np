@@ -33,8 +33,9 @@
 #define TC_ACT_VALUE_MAX	TC_ACT_TRAP
 
 struct netpolicy_rule {
-    __u32 address[2];
-    __u16 ports;
+    __u32 from[4];
+    __u32 to[4];
+    __u16 port;
 };
 
 struct {

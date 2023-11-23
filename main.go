@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/netip"
 	"os"
 
 	"github.com/cilium/ebpf"
@@ -24,6 +25,12 @@ const (
 var isBigEndian = native.IsBigEndian
 
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target bpf -cflags "-D__TARGET_ARCH_x86" microseg_agent ./ebpf/net-policy.c
+
+type NetpolicyRule struct {
+	Address [2]uint32
+	Ports   uint16
+	Pad     [2]byte
+}
 
 type PolicyEnforcer struct {
 	object *microseg_agentObjects
@@ -111,8 +118,20 @@ func (p *PolicyEnforcer) attachTC(ifindex uint32, direction string, fd uint32, n
 	return nil
 }
 
-func (p *PolicyEnforcer) updatePolicyRule() {
+func (p *PolicyEnforcer) updatePolicyRule() error {
+	addr, _ := netip.ParseAddr("172.17.0.1")
+	from := addr.As16()
 
+	destAddr, _ := netip.ParseAddr("172.17.0.2")
+	dest := destAddr.AsSlice()
+
+	rule := NetpolicyRule{}
+	ip := addr.AsSlice()
+	err := p.object.RuleMap.Update(ip)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func main() {
@@ -132,7 +151,7 @@ func main() {
 		return
 	}
 	name := info.Name
-	var ifindex uint32 = 12 
+	var ifindex uint32 = 12
 
 	err = p.attachTC(ifindex, "egress", uint32(fd), name)
 	if err != nil {
