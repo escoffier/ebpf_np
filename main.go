@@ -129,7 +129,7 @@ func (p *PolicyEnforcer) updatePolicyRule() error {
 	rule := NetpolicyRule{
 		From: from,
 		To:   to,
-		Port: uint16(80),
+		Port: uint16(1234),
 	}
 	ip := addr.AsSlice()
 
