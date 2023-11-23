@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cilium/ebpf"
 	"github.com/florianl/go-tc"
 	"github.com/florianl/go-tc/core"
 	"github.com/josharian/native"
@@ -16,6 +17,8 @@ const (
 
 	TcaBpfFlagActDiretct = 1 << 0 // refer to include/uapi/linux/pkt_cls.h TCA_BPF_FLAG_ACT_DIRECT
 	TcPrioFilter         = 1      // refer to include/uapi/linux/pkt_sched.h TC_PRIO_FILLER
+
+	MapsPinpath = "/sys/fs/bpf/microseg"
 )
 
 var isBigEndian = native.IsBigEndian
@@ -27,8 +30,18 @@ type PolicyEnforcer struct {
 }
 
 func (p *PolicyEnforcer) initEbpfObjects() error {
+	var options ebpf.CollectionOptions
+	if _, err := os.Stat(MapsPinpath); err != nil {
+		if os.IsNotExist(err) {
+			if err := os.Mkdir(MapsPinpath, os.ModePerm); err != nil {
+				return fmt.Errorf("unable to create ambient bpf mount directory: %v", err)
+			}
+		}
+	}
+	options.Maps.PinPath = MapsPinpath
+
 	object := microseg_agentObjects{}
-	err := loadMicroseg_agentObjects(&object, nil)
+	err := loadMicroseg_agentObjects(&object, &options)
 	if err != nil {
 		fmt.Printf("load object: %v\n", err)
 		return err
