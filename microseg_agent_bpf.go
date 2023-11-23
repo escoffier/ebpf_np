@@ -58,7 +58,7 @@ type microseg_agentSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type microseg_agentProgramSpecs struct {
-	TcEgress *ebpf.ProgramSpec `ebpf:"tc_egress"`
+	WlEgress *ebpf.ProgramSpec `ebpf:"wl_egress"`
 }
 
 // microseg_agentMapSpecs contains maps before they are loaded into the kernel.
@@ -100,12 +100,12 @@ func (m *microseg_agentMaps) Close() error {
 //
 // It can be passed to loadMicroseg_agentObjects or ebpf.CollectionSpec.LoadAndAssign.
 type microseg_agentPrograms struct {
-	TcEgress *ebpf.Program `ebpf:"tc_egress"`
+	WlEgress *ebpf.Program `ebpf:"wl_egress"`
 }
 
 func (p *microseg_agentPrograms) Close() error {
 	return _Microseg_agentClose(
-		p.TcEgress,
+		p.WlEgress,
 	)
 }
 
