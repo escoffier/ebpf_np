@@ -44,17 +44,24 @@ struct {
         __type(key, __u32);
         __type(value, struct netpolicy_rule);
         __uint(pinning, LIBBPF_PIN_BY_NAME);
-} rule_map SEC(".maps");
+} netpolicy_rule SEC(".maps");
 
 // static __inline struct app_info * get_app_info_from_ipv4(__u32 ipv4)
 // {
 //     return bpf_map_lookup_elem(&rule_map, &ipv4);
 // }
 
+// ipv4 should be in big endian
+static __inline struct app_info * get_rule_from_ipv4(__u32 ipv4)
+{
+    return bpf_map_lookup_elem(&netpolicy_rule, &ipv4);
+}
+
 SEC("tc") 
 int wl_egress(struct __sk_buff *skb) {
   void *data = (void *)(long)skb->data;
   void *data_end = (void *)(long)skb->data_end;
+  struct netpolicy_rule *rule = NULL;
 
   if (data_end < data + ETH_HLEN) {
     return TC_ACT_OK; // Not our packet, return it back to kernel
@@ -73,6 +80,13 @@ int wl_egress(struct __sk_buff *skb) {
 
   bpf_printk("tc egress protocol:  %d, source ip: %u, dest ip: %d.\n",
              eth->h_proto, ip->saddr, ip->daddr);
+  
+  rule = get_rule_from_ipv4(ip->saddr);
+  if (rule) {
+    bpf_printk("match rule, drop pkt");
+    return TC_ACT_SHOT;
+  }
+
   return TC_ACT_OK;
 }
 

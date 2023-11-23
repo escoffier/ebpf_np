@@ -27,9 +27,10 @@ var isBigEndian = native.IsBigEndian
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target bpf -cflags "-D__TARGET_ARCH_x86" microseg_agent ./ebpf/net-policy.c
 
 type NetpolicyRule struct {
-	Address [2]uint32
-	Ports   uint16
-	Pad     [2]byte
+	From [16]byte
+	To   [16]byte
+	Port uint16
+	_    [2]byte
 }
 
 type PolicyEnforcer struct {
@@ -123,11 +124,16 @@ func (p *PolicyEnforcer) updatePolicyRule() error {
 	from := addr.As16()
 
 	destAddr, _ := netip.ParseAddr("172.17.0.2")
-	dest := destAddr.AsSlice()
+	to := destAddr.As16()
 
-	rule := NetpolicyRule{}
+	rule := NetpolicyRule{
+		From: from,
+		To:   to,
+		Port: uint16(80),
+	}
 	ip := addr.AsSlice()
-	err := p.object.RuleMap.Update(ip)
+
+	err := p.object.RuleMap.Update(ip, rule, ebpf.UpdateAny)
 	if err != nil {
 		return err
 	}
@@ -155,10 +161,15 @@ func main() {
 
 	err = p.attachTC(ifindex, "egress", uint32(fd), name)
 	if err != nil {
-		fmt.Printf("attatch tc %v", err)
+		fmt.Printf("attach tc %v", err)
 		return
 	}
 
+	err = p.updatePolicyRule()
+	if err != nil {
+		fmt.Printf("update rule: %v", err)
+		return
+	}
 }
 
 func htons(a uint16) uint16 {
