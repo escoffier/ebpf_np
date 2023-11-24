@@ -46,11 +46,6 @@ struct {
         __uint(pinning, LIBBPF_PIN_BY_NAME);
 } netpolicy_rule SEC(".maps");
 
-// static __inline struct app_info * get_app_info_from_ipv4(__u32 ipv4)
-// {
-//     return bpf_map_lookup_elem(&rule_map, &ipv4);
-// }
-
 // ipv4 should be in big endian
 static __inline struct netpolicy_rule * get_rule_from_ipv4(__u32 ipv4)
 {
