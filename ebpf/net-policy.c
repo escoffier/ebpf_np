@@ -2,7 +2,6 @@
 // #include <bpf/bpf.h>
 #include <bpf/bpf_endian.h>
 #include <bpf/bpf_helpers.h>
-#include <linux/bpf.h>
 // #include <linux/bpf.h>
 // #include <linux/if_ether.h>
 // #include <linux/ip.h>
@@ -34,6 +33,19 @@
      * is alright.                                                             \
      */
 #define TC_ACT_VALUE_MAX TC_ACT_TRAP
+
+/* User return codes for XDP prog type.
+ * A valid XDP program must return one of these defined values. All other
+ * return codes are reserved for future use. Unknown return codes will
+ * result in packet drops and a warning via bpf_warn_invalid_xdp_action().
+ */
+enum xdp_action {
+	XDP_ABORTED = 0,
+	XDP_DROP,
+	XDP_PASS,
+	XDP_TX,
+	XDP_REDIRECT,
+};
 
 struct xdp_md {
 	__u32 data;
