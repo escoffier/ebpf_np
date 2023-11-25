@@ -144,10 +144,9 @@ int wl_egress(struct __sk_buff *skb) {
     rule = get_rule_from_ipv4(dest_addr);
     if (rule) {
       if (rule->port == bpf_ntohs(dest_port) && rule->action == DENY) {
-        bpf_printk("match rule, port %u, drop pkt\n", rule->port);
-        return XDP_DROP;
+        bpf_printk("tc match rule, port %u, drop pkt\n", rule->port);
+        return TC_ACT_SHOT;
       }
-      return TC_ACT_SHOT;
     }
   }
 
@@ -252,7 +251,7 @@ int xdp_ingress(struct xdp_md *ctx) {
   rule = get_rule_from_ipv4(ip->saddr);
   if (rule) {
     if (rule->port == dest_port && rule->action == DENY) {
-      bpf_printk("match rule, port %u, drop pkt\n", rule->port);
+      bpf_printk("xdp match rule, port %u, drop pkt\n", rule->port);
       return XDP_DROP;
     }
   }
