@@ -9,10 +9,11 @@ import (
 	"os"
 
 	"github.com/cilium/ebpf"
-	"github.com/cilium/ebpf/link"
 	"github.com/florianl/go-tc"
 	"github.com/florianl/go-tc/core"
 	"github.com/josharian/native"
+	"github.com/vishvananda/netlink"
+	"github.com/vishvananda/netlink/nl"
 	"golang.org/x/sys/unix"
 )
 
@@ -123,10 +124,16 @@ func (p *PolicyEnforcer) attachTC(ifindex uint32, direction string, fd uint32, n
 }
 
 func (p *PolicyEnforcer) attachXDP(iface *net.Interface) error {
-	_, err := link.AttachXDP(link.XDPOptions{
-		Program:   p.object.XdpIngress,
-		Interface: iface.Index,
-	})
+	link, err := netlink.LinkByName(iface.Name)
+	if err != nil {
+		return fmt.Errorf("getting interface %s by name: %w", iface.Name, err)
+	}
+	err = netlink.LinkSetXdpFdWithFlags(link, p.object.XdpIngress.FD(), nl.XDP_FLAGS_DRV_MODE)
+
+	// _, err = link.AttachXDP(link.XDPOptions{
+	// 	Program:   p.object.XdpIngress,
+	// 	Interface: iface.Index,
+	// })
 	if err != nil {
 		log.Fatalf("could not attach XDP program: %s", err)
 		return err
