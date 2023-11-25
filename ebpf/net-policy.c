@@ -99,7 +99,7 @@ int wl_egress(struct __sk_buff *skb) {
     return TC_ACT_OK;
   }
 
-  bpf_printk("tc egress protocol:  %d, source ip: %u, dest ip: %u.\n",
+  bpf_printk("tc egress protocol:  %d, source ip: %u, dest ip: %u\n",
              eth->h_proto, bpf_ntohl(ip->saddr), bpf_ntohl(ip->daddr));
 
   rule = get_rule_from_ipv4(ip->saddr);
@@ -169,7 +169,7 @@ int xdp_ingress(struct xdp_md *ctx) {
     return XDP_PASS;
   }
 
-  bpf_printk("xdp protocol:  %d, source ip: %x, dest ip: %x.\n",
+  bpf_printk("xdp protocol:  %d, source ip: %u, dest ip: %u\n",
              eth->h_proto, bpf_ntohl(ip->saddr), bpf_ntohl(ip->daddr));
 
   rule = get_rule_from_ipv4(ip->saddr);

@@ -189,7 +189,7 @@ func main() {
 		fmt.Printf("init ebpf object: %v\n", err)
 		return
 	}
-	_ = &tc.Config{}
+
 	fd := p.object.WlEgress.FD()
 	info, err := p.object.WlEgress.Info()
 	if err != nil {
