@@ -233,10 +233,16 @@ int xdp_ingress(struct xdp_md *ctx) {
 
   if (ip->protocol == IPPROTO_TCP) {
     struct tcphdr *tcp = (void *)((char *)ip + ip->ihl);
+    if ((void *)(tcp + 1) > data_end) {
+      return XDP_PASS;
+    }
     dest_port = tcp->dest;
     src_port = tcp->source;
   } else if (ip->protocol == IPPROTO_UDP) {
     struct udphdr *udp = (void *)((char *)ip + ip->ihl);
+    if ((void *)(udp + 1) > data_end) {
+      return XDP_PASS;
+    }
     dest_port = udp->dest;
     src_port = udp->dest;
   } else {
