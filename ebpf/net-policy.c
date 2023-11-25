@@ -143,7 +143,7 @@ int wl_egress(struct __sk_buff *skb) {
 
     rule = get_rule_from_ipv4(dest_addr);
     if (rule) {
-      if (rule->port == dest_port && rule->action == DENY) {
+      if (rule->port == bpf_ntohs(dest_port) && rule->action == DENY) {
         bpf_printk("match rule, port %u, drop pkt\n", rule->port);
         return XDP_DROP;
       }
