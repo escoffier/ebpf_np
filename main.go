@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -146,20 +147,20 @@ func (p *PolicyEnforcer) attachXDP(iface *net.Interface) error {
 	return nil
 }
 
-func (p *PolicyEnforcer) updatePolicyRule() error {
-	fromAddr, _ := netip.ParseAddr("172.17.0.1")
-	from := fromAddr.As16()
+func (p *PolicyEnforcer) updatePolicyRule(rule NetpolicyRule, ip []byte) error {
+	// fromAddr, _ := netip.ParseAddr("172.17.0.1")
+	// from := fromAddr.As16()
 
-	destAddr, _ := netip.ParseAddr("172.17.0.2")
-	to := destAddr.As16()
+	// destAddr, _ := netip.ParseAddr("172.17.0.2")
+	// to := destAddr.As16()
 
-	rule := NetpolicyRule{
-		From:   from,
-		To:     to,
-		Port:   uint16(80),
-		Action: DENY,
-	}
-	ip := destAddr.AsSlice()
+	// rule := NetpolicyRule{
+	// 	From:   from,
+	// 	To:     to,
+	// 	Port:   uint16(80),
+	// 	Action: DENY,
+	// }
+	// ip := destAddr.AsSlice()
 
 	err := p.object.NetpolicyRule.Update(ip, rule, ebpf.UpdateAny)
 	if err != nil {
@@ -174,6 +175,12 @@ func main() {
 		return
 	}
 	ifaceName := os.Args[1]
+
+	rule, key, err := readPolicyFromFile("policy.json")
+	if err != nil {
+		log.Fatalf("read policy: %v", err)
+		return
+	}
 
 	iface, err := net.InterfaceByName(ifaceName)
 	if err != nil {
@@ -216,7 +223,7 @@ func main() {
 		return
 	}
 
-	err = p.updatePolicyRule()
+	err = p.updatePolicyRule(rule, key)
 	if err != nil {
 		fmt.Printf("update rule: %v", err)
 		return
@@ -228,4 +235,35 @@ func htons(a uint16) uint16 {
 		return a
 	}
 	return (a&0xff)<<8 | (a&0xff00)>>8
+}
+
+func readPolicyFromFile(path string) (NetpolicyRule, []byte, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return NetpolicyRule{}, nil, err
+	}
+	p := struct {
+		From   string
+		To     string
+		Port   uint16
+		Action uint16
+	}{}
+	err = json.Unmarshal(data, &p)
+	if err != nil {
+		return NetpolicyRule{}, nil, err
+	}
+
+	fromAddr, _ := netip.ParseAddr(p.From)
+	from := fromAddr.As16()
+
+	destAddr, _ := netip.ParseAddr(p.To)
+	to := destAddr.As16()
+
+	rule := NetpolicyRule{
+		From:   from,
+		To:     to,
+		Port:   p.Port,
+		Action: p.Action,
+	}
+	return rule, destAddr.AsSlice(), nil
 }
