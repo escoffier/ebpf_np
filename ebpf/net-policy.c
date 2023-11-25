@@ -1,4 +1,5 @@
 #include "vmlinux.h"
+// #include <bpf/bpf.h>
 #include <bpf/bpf_endian.h>
 #include <bpf/bpf_helpers.h>
 // #include <linux/bpf.h>
@@ -32,6 +33,17 @@
      * is alright.                                                             \
      */
 #define TC_ACT_VALUE_MAX TC_ACT_TRAP
+
+struct xdp_md {
+	__u32 data;
+	__u32 data_end;
+	__u32 data_meta;
+	/* Below access go through struct xdp_rxq_info */
+	__u32 ingress_ifindex; /* rxq->dev->ifindex */
+	__u32 rx_queue_index;  /* rxq->queue_index  */
+
+	__u32 egress_ifindex;  /* txq->dev->ifindex */
+};
 
 struct netpolicy_rule {
   __u32 from[4];
