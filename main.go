@@ -24,6 +24,10 @@ const (
 	TcPrioFilter         = 1      // refer to include/uapi/linux/pkt_sched.h TC_PRIO_FILLER
 
 	MapsPinpath = "/sys/fs/bpf/microseg"
+
+	ALLOW = 0
+	DENY  = 1
+	LOG   = 2
 )
 
 var isBigEndian = native.IsBigEndian
@@ -31,10 +35,10 @@ var isBigEndian = native.IsBigEndian
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -target bpf -cflags "-D__TARGET_ARCH_x86" microseg_agent ./ebpf/net-policy.c
 
 type NetpolicyRule struct {
-	From [16]byte
-	To   [16]byte
-	Port uint16
-	_    [2]byte
+	From   [16]byte
+	To     [16]byte
+	Port   uint16
+	Action uint16
 }
 
 type PolicyEnforcer struct {
@@ -150,9 +154,10 @@ func (p *PolicyEnforcer) updatePolicyRule() error {
 	to := destAddr.As16()
 
 	rule := NetpolicyRule{
-		From: from,
-		To:   to,
-		Port: uint16(1234),
+		From:   from,
+		To:     to,
+		Port:   uint16(1234),
+		Action: DENY,
 	}
 	ip := addr.AsSlice()
 
