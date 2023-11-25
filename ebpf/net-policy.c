@@ -84,15 +84,15 @@ static __inline struct netpolicy_rule *get_rule_from_ipv4(__u32 ipv4) {
   return bpf_map_lookup_elem(&netpolicy_rule, &ipv4);
 }
 
-static __always_inline int ipv4_hdrlen(const struct iphdr *ip4)
-{
-	return ip4->ihl * 4;
+static __always_inline int ipv4_hdrlen(const struct iphdr *ip4) {
+  return ip4->ihl * 4;
 }
 
-# define offsetof(T, M)		__builtin_offsetof(T, M)
+#ifndef offsetof
+#define offsetof(T, M) __builtin_offsetof(T, M)
+#endif
 
 #define TCP_SPORT_OFF (offsetof(struct tcphdr, source))
-
 
 static __inline int parse_l4(void *data, void *data_end, __u32 *src_addr,
                              __u32 *dest_addr, __u16 *src_port,
