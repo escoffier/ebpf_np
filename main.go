@@ -3,10 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
+	"net"
 	"net/netip"
 	"os"
 
 	"github.com/cilium/ebpf"
+	"github.com/cilium/ebpf/link"
 	"github.com/florianl/go-tc"
 	"github.com/florianl/go-tc/core"
 	"github.com/josharian/native"
@@ -119,6 +122,19 @@ func (p *PolicyEnforcer) attachTC(ifindex uint32, direction string, fd uint32, n
 	return nil
 }
 
+func (p *PolicyEnforcer) attachXDP(iface *net.Interface) error {
+	_, err := link.AttachXDP(link.XDPOptions{
+		Program:   p.object.XdpIngress,
+		Interface: iface.Index,
+	})
+	if err != nil {
+		log.Fatalf("could not attach XDP program: %s", err)
+		return err
+	}
+	log.Printf("Attached XDP program to iface %q (index %d)", iface.Name, iface.Index)
+	return nil
+}
+
 func (p *PolicyEnforcer) updatePolicyRule() error {
 	addr, _ := netip.ParseAddr("172.17.0.1")
 	from := addr.As16()
@@ -141,10 +157,27 @@ func (p *PolicyEnforcer) updatePolicyRule() error {
 }
 
 func main() {
+	if len(os.Args) < 2 {
+		println("Please specify a network interface")
+		return
+	}
+	ifaceName := os.Args[1]
+
+	iface, err := net.InterfaceByName(ifaceName)
+	if err != nil {
+		log.Fatalf("lookup network iface %q: %s", ifaceName, err)
+	}
+
+	// ifindex, err := strconv.ParseUint(os.Args[1], 10, 0)
+	// if err != nil {
+	// 	fmt.Printf("invalid if index %v", err)
+	// 	return
+	// }
+
 	p := PolicyEnforcer{
 		// object: &microseg_agentObjects{},
 	}
-	err := p.initEbpfObjects()
+	err = p.initEbpfObjects()
 	if err != nil {
 		fmt.Printf("init ebpf object: %v\n", err)
 		return
@@ -157,11 +190,16 @@ func main() {
 		return
 	}
 	name := info.Name
-	var ifindex uint32 = 12
+	// var ifindex uint32 = 12
 
-	err = p.attachTC(ifindex, "egress", uint32(fd), name)
+	err = p.attachTC(uint32(iface.Index), "egress", uint32(fd), name)
 	if err != nil {
 		fmt.Printf("attach tc %v", err)
+		return
+	}
+
+	err = p.attachXDP(iface)
+	if err != nil {
 		return
 	}
 
