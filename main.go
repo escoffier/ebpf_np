@@ -156,7 +156,7 @@ func (p *PolicyEnforcer) updatePolicyRule() error {
 	rule := NetpolicyRule{
 		From:   from,
 		To:     to,
-		Port:   uint16(1234),
+		Port:   uint16(80),
 		Action: DENY,
 	}
 	ip := destAddr.AsSlice()
