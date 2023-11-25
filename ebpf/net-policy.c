@@ -96,14 +96,14 @@ static __inline int parse_l4(void *data, void *data_end, __u32 *src_addr,
   *dest_addr = ip->daddr;
 
   if (ip->protocol == IPPROTO_TCP) {
-    struct tcphdr *tcp = (void *)((__u8 *)ip + ip->ihl);
+    struct tcphdr *tcp = (void *)((__u8 *)ip + ip->ihl * 4);
     if ((void *)(tcp + 1) > data_end) {
       return 1;
     }
     *dest_port = tcp->dest;
     *src_port = tcp->source;
   } else if (ip->protocol == IPPROTO_UDP) {
-    struct udphdr *udp = (void *)((__u8 *)ip + ip->ihl);
+    struct udphdr *udp = (void *)((__u8 *)ip + ip->ihl * 4);
     if ((void *)(udp + 1) > data_end) {
       return 1;
     }
@@ -232,14 +232,14 @@ int xdp_ingress(struct xdp_md *ctx) {
              bpf_ntohl(ip->saddr), bpf_ntohl(ip->daddr));
 
   if (ip->protocol == IPPROTO_TCP) {
-    struct tcphdr *tcp = (void *)((char *)ip + ip->ihl);
+    struct tcphdr *tcp = (void *)((char *)ip + ip->ihl * 4);
     if ((void *)(tcp + 1) > data_end) {
       return XDP_PASS;
     }
     dest_port = tcp->dest;
     src_port = tcp->source;
   } else if (ip->protocol == IPPROTO_UDP) {
-    struct udphdr *udp = (void *)((char *)ip + ip->ihl);
+    struct udphdr *udp = (void *)((char *)ip + ip->ihl * 4);
     if ((void *)(udp + 1) > data_end) {
       return XDP_PASS;
     }
