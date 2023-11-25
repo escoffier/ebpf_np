@@ -147,8 +147,8 @@ func (p *PolicyEnforcer) attachXDP(iface *net.Interface) error {
 }
 
 func (p *PolicyEnforcer) updatePolicyRule() error {
-	addr, _ := netip.ParseAddr("172.17.0.1")
-	from := addr.As16()
+	fromAddr, _ := netip.ParseAddr("172.17.0.1")
+	from := fromAddr.As16()
 
 	destAddr, _ := netip.ParseAddr("172.17.0.2")
 	to := destAddr.As16()
@@ -159,7 +159,7 @@ func (p *PolicyEnforcer) updatePolicyRule() error {
 		Port:   uint16(1234),
 		Action: DENY,
 	}
-	ip := addr.AsSlice()
+	ip := destAddr.AsSlice()
 
 	err := p.object.NetpolicyRule.Update(ip, rule, ebpf.UpdateAny)
 	if err != nil {
