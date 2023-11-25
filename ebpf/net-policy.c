@@ -139,7 +139,7 @@ int wl_egress(struct __sk_buff *skb) {
   if (ret == 0) {
     bpf_printk("tc egress protocol: %d, source: %u:%u\n", eth->h_proto,
                bpf_ntohl(src_addr), src_port);
-    bpf_printk("dest: %u:%u\n", bpf_ntohl(dest_addr), (dest_port));
+    bpf_printk("dest: %u:%u\n", bpf_ntohl(dest_addr), bpf_ntohl(dest_port));
 
     rule = get_rule_from_ipv4(dest_addr);
     if (rule) {
