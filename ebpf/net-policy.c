@@ -97,12 +97,18 @@ static __inline int parse_l4(void *data, void *data_end, __u32 *src_addr,
 
   if (ip->protocol == IPPROTO_TCP) {
     struct tcphdr *tcp = (void *)((__u8 *)ip + ip->ihl);
+    if ((void *)(tcp + 1) > data_end) {
+      return 1;
+    }
     *dest_port = tcp->dest;
     *src_port = tcp->source;
   } else if (ip->protocol == IPPROTO_UDP) {
     struct udphdr *udp = (void *)((__u8 *)ip + ip->ihl);
+    if ((void *)(udp + 1) > data_end) {
+      return 1;
+    }
     *dest_port = udp->dest;
-    *src_port = udp->dest;
+    *src_port = udp->source;
   } else {
     return 1;
   }
