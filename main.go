@@ -190,20 +190,19 @@ func main() {
 		return
 	}
 
-	fd := p.object.WlEgress.FD()
-	info, err := p.object.WlEgress.Info()
-	if err != nil {
-		fmt.Printf("get ingress %v", err)
-		return
-	}
-	name := info.Name
-	// var ifindex uint32 = 12
+	// fd := p.object.WlEgress.FD()
+	// info, err := p.object.WlEgress.Info()
+	// if err != nil {
+	// 	fmt.Printf("get ingress %v", err)
+	// 	return
+	// }
+	// name := info.Name
 
-	err = p.attachTC(uint32(iface.Index), "egress", uint32(fd), name)
-	if err != nil {
-		fmt.Printf("attach tc %v", err)
-		return
-	}
+	// err = p.attachTC(uint32(iface.Index), "egress", uint32(fd), name)
+	// if err != nil {
+	// 	fmt.Printf("attach tc %v", err)
+	// 	return
+	// }
 
 	err = p.attachXDP(iface)
 	if err != nil {
