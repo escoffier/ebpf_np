@@ -131,8 +131,9 @@ int wl_egress(struct __sk_buff *skb) {
   int ret =
       parse_l4(data, data_end, &src_addr, &dest_addr, &src_port, &dest_port);
   if (ret == 0) {
-    bpf_printk("tc egress protocol:  %d, source ip: %u:%u, dest ip: %u:%u\n",
-               eth->h_proto, bpf_ntohl(src_addr), src_port, bpf_ntohl(dest_addr), dest_port);
+    bpf_printk("tc egress protocol: %d, source: %u:%u, ", eth->h_proto,
+               bpf_ntohl(src_addr), src_port);
+    bpf_printk("dest: %u:%u\n", bpf_ntohl(dest_addr), dest_port);
 
     rule = get_rule_from_ipv4(dest_addr);
     if (rule) {
