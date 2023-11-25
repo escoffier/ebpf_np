@@ -12,10 +12,10 @@ import (
 )
 
 type microseg_agentNetpolicyRule struct {
-	From [4]uint32
-	To   [4]uint32
-	Port uint16
-	_    [2]byte
+	From   [4]uint32
+	To     [4]uint32
+	Port   uint16
+	Action uint16
 }
 
 // loadMicroseg_agent returns the embedded CollectionSpec for microseg_agent.
