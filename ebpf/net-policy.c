@@ -2,6 +2,7 @@
 // #include <bpf/bpf.h>
 #include <bpf/bpf_endian.h>
 #include <bpf/bpf_helpers.h>
+#include <linux/bpf.h>
 // #include <linux/bpf.h>
 // #include <linux/if_ether.h>
 // #include <linux/ip.h>
@@ -142,28 +143,29 @@ int xdp_ingress(struct xdp_md *ctx) {
   // First, parse the ethernet header.
   struct ethhdr *eth = data;
   if ((void *)(eth + 1) > data_end) {
-    return 0;
+    return XDP_PASS;
   }
 
   if (eth->h_proto != bpf_htons(ETH_P_IP)) {
     // The protocol is not IPv4, so we can't parse an IPv4 source address.
-    return 0;
+    return XDP_PASS;
   }
 
   // Then parse the IP header.
   struct iphdr *ip = (void *)(eth + 1);
   if ((void *)(ip + 1) > data_end) {
-    return 0;
+    return XDP_PASS;
   }
 
-  bpf_printk("tc ingress protocol:  %d, source ip: %u, dest ip: %u.\n",
+  bpf_printk("xdp protocol:  %d, source ip: %x, dest ip: %x.\n",
              eth->h_proto, bpf_ntohl(ip->saddr), bpf_ntohl(ip->daddr));
 
   rule = get_rule_from_ipv4(ip->saddr);
   if (rule) {
     bpf_printk("match rule, port %u, drop pkt\n", rule->port);
-    return TC_ACT_SHOT;
+    return XDP_DROP;
   }
+  return XDP_PASS;
 }
 
 char __license[] SEC("license") = "GPL";
